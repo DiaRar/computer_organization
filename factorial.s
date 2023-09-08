@@ -1,5 +1,5 @@
-print_num:     .asciz "%ld\n"
-input_num:     .asciz "%ld"
+print_num:     .asciz "%lu\n"
+input_num:     .asciz "%lu"
 
 .global main
 main:
