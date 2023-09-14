@@ -3,6 +3,12 @@
 .include "final.s"
 output: .asciz "%d\n"
 output_char: .asciz "%c"
+color: .asciz "\033"
+foreground: .asciz "[38;5;"
+background: .asciz "[48;5;"
+end_of_change: .asciz "m"
+number_of_color: .asciz "%d"
+special_effect: .asciz "["
 .global main
 # ************************************************************
 # Subroutine: decode                                         *
@@ -15,6 +21,61 @@ output_char: .asciz "%c"
 #   first: the address of the message to read                *
 #   return: no return value                                  *
 # ************************************************************
+
+print_foreground:
+	push	%rbp
+	mov 	%rsp, %rbp
+
+	push	%rdi
+	
+
+	mov		$color, %rdi
+	mov		$0, %rax
+	call 	printf
+
+	mov		$foreground, %rdi
+	mov		$0, %rax
+	call 	printf
+
+	mov		$number_of_color, %rdi
+	pop		%rsi
+	mov 	$0, %rax
+	call	printf
+
+	mov		$end_of_change, %rdi
+	mov		$0, %rax
+	call 	printf
+
+	mov		%rbp, %rsp
+	pop 	%rbp
+	ret
+print_background:
+	push	%rbp
+	mov 	%rsp, %rbp
+
+	push 	%rdi
+	
+
+	mov		$color, %rdi
+	mov		$0, %rax
+	call 	printf
+
+	mov		$background, %rdi
+	mov		$0, %rax
+	call 	printf
+
+	mov		$number_of_color, %rdi
+	pop		%rsi
+	mov 	$0, %rax
+	call	printf
+
+	mov		$end_of_change, %rdi
+	mov		$0, %rax
+	call 	printf
+
+	mov		%rbp, %rsp
+	pop 	%rbp
+	ret
 decode:
 	# prologue
 	pushq	%rbp 			# push the base pointer (and align the stack)
@@ -24,15 +85,26 @@ decode:
 	push	%rbx 	# Pushing callee-saved registers to stack to restore them
 	push 	%r12	# in the epilogue
 	push	%r13
-
-	mov 	$0, %r13 # Putting 0 in r13 in case it had a previous value
-
+	push	%r14
+	
     mov 	%rdi, %rbx
     mov 	$0, %rcx
 start_loop:
     mov 	(%rbx, %rcx, 8), %r12 	# %r12 = MESSAGE[%rcx]
 	mov 	%r12b, %r13b			# Moving the char
 	shr 	$8, %r12				# Shifting the char
+
+	mov		%r12, %r14
+	shr		$40, %r14
+	mov		$0, %rdi
+	mov		%r14b, %dil
+	call	print_foreground
+
+	shr		$8, %r14
+	mov 	$0, %rdi
+	mov		%r14b, %dil
+	call	print_background
+	
 loop:
 	test 	%r12b, %r12b			# Setting ZF (Zero Flag)
 	jz 		jump_loop				# Jumping if ZF
@@ -50,6 +122,7 @@ jump_loop:
 	jnz		start_loop				# Jumping if not ZF
 	# epilogue
 
+	pop		%r14
 	pop		%r13					# Restoring the callee saved registers
 	pop		%r12
 	pop		%rbx
