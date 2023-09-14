@@ -17,7 +17,7 @@ main:
      pop       %rsi      # Popping the second parameter
      pop       %rdi      # Popping the first parameter
 
-     call      pow_fast
+     call      pow
 
      mov       $print_num, %rdi
      mov       %rax, %rsi
@@ -26,48 +26,48 @@ main:
      call      exit
 
 
-# pow:
-#      push      %rbp           # Boilerplate cuz of convention
-#      mov       %rsp, %rbp
+ pow:
+      push      %rbp           # Boilerplate cuz of convention
+      mov       %rsp, %rbp
 
-#      mov       $1, %rax
-# .loop:
-#      test      %rsi, %rsi     # Setting the ZF (Zero Flag)
-#      jz        .loop_end      # Checking if ZF is 0
-#      mul       %rdi           # Multiplying RAX by RDI
-#      dec       %rsi           # Decreasing RSI
-#      jmp       .loop
-# .loop_end:
-#      mov       %rbp, %rsp     # More boilerplate
-#      pop       %rbp
-#      ret
+      mov       $1, %rax
+ .loop:
+      test      %rsi, %rsi     # Setting the ZF (Zero Flag)
+      jz        .loop_end      # Checking if ZF is 0
+      mul       %rdi           # Multiplying RAX by RDI
+      dec       %rsi           # Decreasing RSI
+      jmp       .loop
+ .loop_end:
+      mov       %rbp, %rsp     # More boilerplate
+      pop       %rbp
+      ret
      
-pow_fast:
-     push      %rbp           # Boilerplate cuz of convention
-     mov       %rsp, %rbp
+#pow_fast:
+#     push      %rbp           # Boilerplate cuz of convention
+#     mov       %rsp, %rbp
+#
+#    mov       %rdi, %rax
+#     dec       %rsi
+#.loop:
+#     test      %rsi, %rsi     # Setting the ZF (Zero Flag)
+#     jz        .loop_end      # Checking if ZF is 0
+#
+#     and       $1, %rsi
+#     jz        .even
+#     
+#     mul       %rdi           # Multiplying RAX by RDI
+#     dec       %rsi
+#     test      %rsi, %rsi     # Setting the ZF (Zero Flag)
+#     jz        .loop_end      # Checking if ZF is 0
 
-     mov       %rdi, %rax
-     dec       %rsi
-.loop:
-     test      %rsi, %rsi     # Setting the ZF (Zero Flag)
-     jz        .loop_end      # Checking if ZF is 0
+#.even:
 
-     and       $1, %rsi
-     jz        .even
-     
-     mul       %rdi           # Multiplying RAX by RDI
-     dec       %rsi
-     test      %rsi, %rsi     # Setting the ZF (Zero Flag)
-     jz        .loop_end      # Checking if ZF is 0
+#    shr       $1, %rsi
+#     mul       %rax
+#     jmp       .loop
 
-.even:
+#.loop_end:
 
-     shr       $1, %rsi
-     mul       %rax
-     jmp       .loop
-
-.loop_end:
-
-     mov       %rbp, %rsp     # More boilerplate
-     pop       %rbp
-     ret
+#     mov       %rbp, %rsp     # More boilerplate
+#     pop       %rbp
+#     ret
