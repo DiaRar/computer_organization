@@ -5,10 +5,10 @@ output: .asciz "%d\n"
 output_char: .asciz "%c"
 color: .asciz "\033"
 foreground: .asciz "[38;5;"
-background: .asciz "[48;5;"
+background: .asciz ";48;5;"
 end_of_change: .asciz "m"
 number_of_color: .asciz "%d"
-special_effect: .asciz "["
+special_effect_start: .asciz "["
 .global main
 # ************************************************************
 # Subroutine: decode                                         *
@@ -22,10 +22,11 @@ special_effect: .asciz "["
 #   return: no return value                                  *
 # ************************************************************
 
-print_foreground:
+print_color:
 	push	%rbp
 	mov 	%rsp, %rbp
 
+    push    %rsi
 	push	%rdi
 	
 
@@ -42,25 +43,7 @@ print_foreground:
 	mov 	$0, %rax
 	call	printf
 
-	mov		$end_of_change, %rdi
-	mov		$0, %rax
-	call 	printf
-
-	mov		%rbp, %rsp
-	pop 	%rbp
-	ret
-print_background:
-	push	%rbp
-	mov 	%rsp, %rbp
-
-	push 	%rdi
-	
-
-	mov		$color, %rdi
-	mov		$0, %rax
-	call 	printf
-
-	mov		$background, %rdi
+    mov		$background, %rdi
 	mov		$0, %rax
 	call 	printf
 
@@ -76,6 +59,20 @@ print_background:
 	mov		%rbp, %rsp
 	pop 	%rbp
 	ret
+special_effect:
+    push    %rbp
+    mov     %rsp, %rbp
+
+    push    %rdi
+    mov     $special_effect_start, %rdi
+    mov     $0, %rax
+    call    printf
+
+
+    mov     %rbp, %rsp
+    pop     %rbp
+    ret
+
 decode:
 	# prologue
 	pushq	%rbp 			# push the base pointer (and align the stack)
@@ -97,14 +94,17 @@ start_loop:
 	mov		%r12, %r14
 	shr		$40, %r14
 	mov		$0, %rdi
-	mov		%r14b, %dil
-	call	print_foreground
-
-	shr		$8, %r14
-	mov 	$0, %rdi
-	mov		%r14b, %dil
-	call	print_background
-	
+    mov		%r14b, %dil
+    shr		$8, %r14
+    cmp     %r14b, %dil
+    je      special_effect_conditional
+	mov 	$0, %rsi
+	mov		%r14b, %sil
+	call	print_color
+    jmp     special_effect_end
+special_effect_conditional:
+    call    special_effect
+special_effect_end:
 loop:
 	test 	%r12b, %r12b			# Setting ZF (Zero Flag)
 	jz 		jump_loop				# Jumping if ZF
